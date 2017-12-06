@@ -1,0 +1,204 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="input-validation">
+
+    <div class="form-row input-validation-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <div style="display: inline-block;">
+            <label style="vertical-align: middle;
+                                line-height: 20px;padding-top:10px;" for="node-input-dataInput">
+                    <i class="fa fa-sign-in" aria-hidden="true"></i> Input
+                </label>
+        </div>
+        <div style="width:70%;display: inline-block;">
+            <span style="text-align:center;vertical-align: middle;
+                        line-height: 20px;padding-top:10px;"><b>msg.</b></span>
+            <input type="text" style="width:85%; float:right;" id="node-input-dataInput">
+        </div>
+    </div>
+    <div class="form-row input-validation-row" id="form-schema-row">
+        <div class="form-row input-validation-row">
+            <label style="width:70%;"><i class="fa fa-list"></i> Property Validators</label>
+            <ol id="input-validation-validators"></ol>
+        </div>
+    </div>
+
+</script>
+
+
+<script type="text/x-red" data-help-name="input-validation">
+    <p>An output node use for save data to an influxdb server</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('input-validation', {
+        category: 'function',
+        color: '#C0C0C0',
+        defaults: {
+            name: {
+                value: ""
+            },
+            dataInput: {
+                required: true
+            },
+            validators: {
+                value: [],
+                validate: function (propertyValidators) {
+                    return true;
+                    // if (this.enableSchema == false) {
+                    //     return true
+                    // }
+                    // if (fieldList.length == 0) {
+                    //     return false;
+                    // }
+                    // var isContainEmptyElement = false;
+                    // for (var i = 0; i < fieldList.length; i++) {
+                    //     if (fieldList[i].length == 0) {
+                    //         isContainEmptyElement = true;
+                    //         break;
+                    //     }
+                    // }
+                    // if (isContainEmptyElement == true) {
+                    //     return false;
+                    // } else {
+                    //     return (new Set(fieldList)).size == fieldList.length;
+                    // }
+                }
+            },
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "validation.png",
+        align: "left",
+        label: function () {
+            return this.name || "input validation";
+        },
+        oneditprepare: function () {
+            function resizeRule(rule) {
+                var newWidth = rule.width();
+                rule.find('.red-ui-typedInput').typedInput("width", (newWidth - 15) / 2);
+
+            }
+            var fieldList = $("#input-validation-validators")
+                .css('min-height', '220px')
+                .css('min-width', '450px')
+                .editableList({
+                    addItem: function (container, i, field) {
+                        var propNameRow =
+                            $('<div class="form-row" style="display: inline-block;"/>')
+                            .appendTo(container);
+                        $('<label/>')
+                            .text('Prop Name')
+                            .appendTo(propNameRow);
+                        var propNameInput =
+                            $('<input class = "node-input-field-name" type="text"/>')
+                            .css('width', '100px')
+                            .appendTo(propNameRow);
+                        var propTypeRow =
+                            $('<div class="form-row" style="display: inline-block;"/>')
+                            .appendTo(container);
+                        $('<label/>').text('Type').appendTo(propTypeRow);
+                        var propTypeSelect =
+                            $('<select class="node-input-field-type"/>')
+                            .css('width', '100px')
+                            .html(
+                                '<option value="FLOAT">Float</option>' +
+                                '<option value="INTEGER">Integer</option>' +
+                                '<option value="STRING" selected="true">String</option>' +
+                                '<option value="BOOLEAN">Boolean</option>'
+                            )
+                            .appendTo(propTypeRow)
+                        var operatorRow =
+                            $('<div class="form-row" style="display: inline-block;"/>')
+                            .appendTo(container);
+                        $('<label/>').text('Type').appendTo(operatorRow);
+                        var operatorSelect =
+                            $('<select class="node-input-field-type"/>')
+                            .css('width', '100px')
+                            .html(
+                                '<option value="FLOAT">&gt</option>' +
+                                '<option value="INTEGER">&gt=</option>' +
+                                '<option value="STRING" selected="true">&lt</option>' +
+                                '<option value="BOOLEAN"><&lt=</option>'
+                            )
+                            .appendTo(operatorRow)
+                        if (field.name.length > 0) {
+                            propNameInput.val(field.name);
+                        }
+                        propTypeSelect.val(field.type);
+                        resizeRule(container);
+                    },
+                    resizeItem: resizeRule,
+                    removable: true,
+                    addButton: "add new field"
+                });
+            if (this.validators) {
+                for (var i = 0; i < this.validators.length; i++) {
+                    fieldList.editableList('addItem', this.validators[i]);
+                }
+            }
+
+        },
+        oneditsave: function () {
+
+            var tags = $("#node-input-dbTags-container").editableList('items');
+            var node = this;
+            node.dbTags = [];
+            for (var i = 0; i < tags.length; i++) {
+                var tagName = $(tags[i]).find("input.node-input-tag-name").val();
+                node.dbTags.push(tagName);
+                if (tagName.length == 0) {
+                    RED.notify("Tags name must not be empty !", "error");
+                }
+            }
+            var fields = $("#input-validation-node-input-dbFields-container").editableList('items');
+            var node = this;
+            node.dbFields = [];
+            for (var i = 0; i < fields.length; i++) {
+                var fieldName = $(fields[i]).find("input.node-input-field-name").val();
+                var fieldType = $(fields[i]).find("select.node-input-field-type").val();
+                console.log(fieldType);
+                node.dbFields.push({
+                    'name': fieldName,
+                    'type': fieldType
+                });
+                if (fieldName.length == 0) {
+                    RED.notify("Field name must not be empty !", "error");
+                }
+            }
+
+            if ($("#node-input-enableSchema").is(":checked")) {
+                if (node.dbFields.length == 0 || node.dbTags.length == 0) {
+                    RED.notify("Fields and tags must not be empty!", "error");
+                }
+            }
+            if ((new Set(node.dbTags)).size !== node.dbTags.length) {
+                RED.notify("Entries in tags list must not be duplicated !", "error");
+            };
+
+
+            if ((new Set(node.dbFields)).size !== node.dbFields.length) {
+                RED.notify("Entries in fields list must not be duplicated !", "error");
+            };
+
+        },
+    });
+</script>

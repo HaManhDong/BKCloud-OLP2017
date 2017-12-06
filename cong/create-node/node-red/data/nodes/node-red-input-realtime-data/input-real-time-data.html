@@ -1,0 +1,285 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="real-time-data">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="real-time-data-triggerMode-select"><i class="fa fa-cogs"></i> <span>Mode</span></label>
+        <select id="real-time-data-triggerMode-select">
+                <option value="none">One time after start</option>
+                <option value="interval">Repeat after a time interval</option>
+        </select>
+        <input type="hidden" id="node-input-triggerMode">
+        <input type="hidden" id="node-input-delaySecond">
+        <input type="hidden" id="node-input-intervalSecond">
+    </div>
+
+    <div class="form-row trigger-mode-row hidden" id="trigger-mode-row-none">
+        <label for="trigger-delay-count"><i class="fa fa-play"></i> <span>Delay</span></label>
+        <input id="trigger-delay-count" style="width:90px !important;" type="number" value="1" step="1" min="1"></input>
+        <span>seconds</span>
+    </div>
+
+    <div class="form-row trigger-mode-row hidden" id="trigger-mode-row-interval">
+        <label for="trigger-interval-count"><i class="fa fa-repeat"></i> <span>Interval</span></label>
+        <input id="trigger-interval-count" style="width:90px !important;" type="number" value="1" step="1" min="1"></input>
+        <span>seconds</span>
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-apiUrl"><i class="fa fa-globe"></i> API URL</label>
+        <input type="text" id="node-input-apiUrl" placeholder="URL of data source: http://..." value="">
+    </div>
+    <div class="form-row">
+        <input type="checkbox" id="real-time-data-enableAuth" style="display: inline-block; width: auto; vertical-align: top; ">
+        <label for="real-time-data-enableAuth"><i class="fa fa-key"></i> Enable Auth</label>
+        <input type="hidden" id="node-input-enableAuth">
+    </div>
+    <div id="real-time-data-auth-info-row" class="hidden" style="margin-left:20px">
+        <div class="form-row">
+            <label for="real-time-data-authMode">Auth Mode</label>
+            <select id="real-time-data-authMode">
+                                <option value="basic">Basic Authentication</option>
+                                <option value="token">Token Authentication</option>        
+                    </select>
+            <input type="hidden" id="node-input-authMode">
+
+            <input type="hidden" id="node-input-basicAuthUserName">
+            <input type="hidden" id="node-input-basicAuthPassword">
+
+            <input type="hidden" id="node-input-tokenAuthLoginUrl">
+            <input type="hidden" id="node-input-tokenAuthUserName">
+            <input type="hidden" id="node-input-tokenAuthPassword">
+        </div>
+        <div id="basic-auth-info-row" class="hidden">
+            <div class="form-row">
+                <label for="basic-auth-info-user-name">User Name</label>
+                <input type="text" id="basic-auth-info-user-name">
+            </div>
+            <div class="form-row">
+                <label for="basic-auth-info-password">Password</label>
+                <input type="password" id="basic-auth-info-password">
+            </div>
+        </div>
+        <div id="token-auth-info-row" class="hidden">
+            <div class="form-row">
+                <label for="token-auth-info-login-url">Login Url</label>
+                <input type="text" id="token-auth-info-login-url">
+            </div>
+            <div class="form-row">
+                <label for="token-auth-info-user-name">User Name</label>
+                <input type="text" id="token-auth-info-user-name">
+            </div>
+            <div class="form-row">
+                <label for="token-auth-info-password">Password</label>
+                <input type="password" id="token-auth-info-password">
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <label for="node-input-returnType"><i class="fa fa-arrow-left"></i> <span>Return</span></label>
+        <select id="node-input-returnType">
+            <option value="string">a UTF8 String</option>
+            <option value="json">a parsed JSON Object</option>            
+        </select>
+        <!-- <input type="hidden" id="node-input-returnType"> -->
+    </div>
+
+</script>
+
+
+
+
+
+
+<style>
+
+</style>
+<script type="text/x-red" data-help-name="real-time-data">
+    <p>A node used for query data from realtime web server via RESTFUL API once time or repeat in a interval</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('real-time-data', {
+        category: 'input',
+        color: '#a6bbcf',
+        defaults: {
+            name: { value: "" },
+            triggerMode: { value: "none" },
+            delaySecond: { value: 1 },
+            intervalSecond: { value: 1 },
+            apiUrl: { value: "", required: true },
+            apiChoice: { value: "1" },
+            returnType: { value: "json" },
+            enableButton: { value: true },
+            enableAuth: { value: "false" },
+            authMode: { value: "basic" },
+
+            basicAuthUserName: { value: "" },
+            basicAuthPassword: { value: "" },
+
+            tokenAuthLoginUrl: { value: "" },
+            tokenAuthUserName: { value: "" },
+            tokenAuthPassword: { value: "" }
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "./icons/input-real-time-data.png",
+        label: function () {
+            return this.name || "real time source";
+        },
+        oneditprepare: function () {
+            $("#real-time-data-enableAuth").change(function () {
+                var isEnableAuth = $("#real-time-data-enableAuth").is(':checked');
+                if (isEnableAuth) {
+                    $("#real-time-data-auth-info-row").show();
+                } else {
+                    $("#real-time-data-auth-info-row").hide();
+                    $("#real-time-data-authMode").val("basic").change();
+                    $("#basic-auth-info-user-name").val("").change();
+                    $("#basic-auth-info-password").val("").change();
+                    $("#token-auth-info-login-url").val("").change();
+                    $("#token-auth-info-user-name").val("").change();
+                    $("#token-auth-info-password").val("").change();
+                }
+            });
+            $("#real-time-data-authMode").change(function () {
+                var authMode = $("#real-time-data-authMode").val();;
+                if (authMode == 'basic') {
+                    $("#basic-auth-info-row").show();
+                    $("#token-auth-info-row").hide();
+                    $("#token-auth-info-login-url").val("").change();
+                    $("#token-auth-info-user-name").val("").change();
+                    $("#token-auth-info-password").val("").change();
+                } else {
+                    $("#basic-auth-info-row").hide();
+                    $("#token-auth-info-row").show();
+                    $("#basic-auth-info-user-name").val("").change();
+                    $("#basic-auth-info-password").val("").change();
+                }
+            });
+            $("#real-time-data-triggerMode-select").change(function () {
+                var modeSelected = $("#real-time-data-triggerMode-select").val();
+                $(".trigger-mode-row").hide();
+                $("#trigger-mode-row-" + modeSelected).show();
+            });
+            var modeSelected = this.triggerMode;
+            $("#real-time-data-triggerMode-select").val(this.triggerMode);
+            $(".trigger-mode-row").hide();
+            $("#trigger-mode-row-" + modeSelected).show();
+            if (modeSelected == "none") {
+                $("#trigger-delay-count").val(this.delaySecond);
+            }
+            else if (modeSelected == "interval") {
+                $("#trigger-interval-count").val(this.intervalSecond);
+            }
+            var enableAuth = this.enableAuth;
+            if (this.enableAuth == "false") {
+                $("#real-time-data-auth-info-row").hide();
+                $("#real-time-data-enableAuth").prop('checked', false);
+            } else {
+                $("#real-time-data-auth-info-row").show();
+                $("#real-time-data-enableAuth").prop('checked', true);
+            }
+
+            var authMode = this.authMode;
+            $("#real-time-data-authMode").val(authMode).change();
+            if (authMode == 'basic') {
+                $("#basic-auth-info-row").show();
+                $("#basic-auth-info-user-name").val(this.basicAuthUserName).change();
+                $("#basic-auth-info-password").val(this.basicAuthPassword).change();
+                // $("#token-auth-info-row").hide();
+                // $("#token-auth-info-login-url").val("").change();
+                // $("#token-auth-info-user-name").val("").change();
+                // $("#token-auth-info-password").val("").change();
+            } else {
+                $("#token-auth-info-row").show();
+                $("#token-auth-info-login-url").val(this.tokenAuthLoginUrl).change();
+                $("#token-auth-info-user-name").val(this.tokenAuthUserName).change();
+                $("#token-auth-info-password").val(this.tokenAuthPassword).change();
+                // $("#basic-auth-info-row").show();
+                // $("#basic-auth-info-user-name").val("").change();
+                // $("#basic-auth-info-password").val("").change();
+            }
+
+
+
+        },
+        oneditsave: function () {
+            var modeSelected = $("#real-time-data-triggerMode-select").val();
+            $("#node-input-triggerMode").val(modeSelected);
+            var inputDelaySecond = $("#trigger-delay-count").val();
+            $("#node-input-delaySecond").val(inputDelaySecond);
+            var inputIntervalSecond = $("#trigger-interval-count").val();
+            $("#node-input-intervalSecond").val(inputIntervalSecond);
+            if (modeSelected == 'none') {
+                this.enableButton = true;
+            } else if (modeSelected == 'interval') {
+                this.enableButton = false;
+            }
+            var isEnableAuth = $("#real-time-data-enableAuth").is(':checked');
+            if (isEnableAuth) {
+                $("#node-input-enableAuth").val("true");
+                var authMode = $("#real-time-data-authMode").val();
+                $("#node-input-authMode").val(authMode);
+                if (authMode == 'basic') {
+                    $("#node-input-basicAuthUserName").val($("#basic-auth-info-user-name").val());
+                    $("#node-input-basicAuthPassword").val($("#basic-auth-info-password").val());
+                } else {
+                    $("#node-input-tokenAuthLoginUrl").val($("#token-auth-info-login-url").val());
+                    $("#node-input-tokenAuthUserName").val($("#token-auth-info-user-name").val());
+                    $("#node-input-tokenAuthPassword").val($("#token-auth-info-password").val());
+                }
+            } else {
+                $("#node-input-enableAuth").val("false");
+            }
+        },
+        button: {
+            enabled: function () {
+                return this.enableButton;
+            },
+            onclick: function () {
+                if (!this.enableButton) {
+                    return RED.notify(RED._("notification.warning", { message: "manual trigger by button is only enable in one time mode" }), "warning");
+                }
+                console.log(this.id);
+                var node = this;
+                $.ajax({
+                    url: "real-time-data/" + node.id,
+                    type: "POST",
+                    success: function (resp) {
+                        // console.log(JSON.stringify(node));
+                        // console.log(node.name);
+                        RED.notify(node.name.toString() + " " + node.id.toString() + " trigger success.", "success");
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        RED.notify("Fail to create trigger from node " + node.name.toString() + " " + node.id.toString(), "error");
+                    }
+                });
+
+            }
+        }
+    });
+
+</script>
+<script>
+
+</script>

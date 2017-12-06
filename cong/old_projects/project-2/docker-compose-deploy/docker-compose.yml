@@ -1,0 +1,36 @@
+version: '2'
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:1.4.10
+    restart: always
+    ports:
+      - 1883:1883
+      - 9001:9001
+    #volumes:
+      #- ./mosquitto/data:/mosquitto/data
+      #- ./mosquitto/log:/mosquitto/log
+      #- ./mosquitto/config/:/mosquitto/config
+  influxdb:
+    image: influxdb:1.3.6
+    restart: always
+    #volumes:
+      #- ./influxdb:/var/lib/influxdb  
+    ports:
+      - 8086:8086
+  node-red:
+    image: nodered/node-red-docker
+    # build: node-red
+    restart: always
+    volumes:
+      - ./node-red/data:/data
+    ports:
+      - 1880:1880
+    stdin_open: true
+    tty: true
+    external_links:
+      - mqtt:mqtt
+      - influxdb:influxdb
+    # command: [sh, -c, "cd /data && npm i node-red-contrib-meo-esp node-red-dashboard && node-red --settings /data/settings.js"]
+    command: [sh, -c, "cd /data && npm i influx@5.0.7 express@4.16.0 mustache@2.3.0 && cd /usr/src/node-red && npm start -- --userDir /data"]
+    # command: ["npm", "start", "--", "--userDir", "/data"]

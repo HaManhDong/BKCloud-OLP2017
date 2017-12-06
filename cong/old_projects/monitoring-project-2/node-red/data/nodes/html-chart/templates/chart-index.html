@@ -1,0 +1,157 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Chart | Index</title>
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="/realtime-chart/static/bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/realtime-chart/static/bower_components/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/realtime-chart/static/dist/css/AdminLTE.min.css">
+    <link rel="stylesheet" href="/realtime-chart/static/dist/css/skins/_all-skins.min.css">
+    <link rel="stylesheet" type="text/css" href="/realtime-chart/static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/realtime-chart/static/css/chart.css">
+
+</head>
+<style>
+    .realtime-chart {
+        margin-bottom: 30px;
+    }
+</style>
+
+<body class="fixed sidebar-mini sidebar-mini-expand-feature skin-black-light">
+    <div class="wrapper">
+        <header class="main-header">
+            <!-- Header Navbar: style can be found in header.less -->
+            <nav class="navbar navbar-static-top">
+                <div class="nav navbar-nav" id="main-header-title">
+                    <div id="header-title-logo">
+                        <b>BK <i class="fa fa-cloud" aria-hidden="true"></i></b>
+                    </div>
+                    <div id="header-page-name">
+                    </div>
+                </div>
+                <div class="navbar-custom-menu" id="nav-header-left-panel">
+                    <b>Realtime Sensor Chart</b>
+                </div>
+            </nav>
+        </header>
+        <!-- Sidebar -->
+        <aside class="main-sidebar">
+            <!-- sidebar: style can be found in sidebar.less -->
+            <section class="sidebar">
+                <ul class="sidebar-menu">
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-line-chart" aria-hidden="true"></i>
+                            <span>Realtime Line Chart</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                            <span>Bar Chart</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#">
+                            <i class="fa fa-pie-chart" aria-hidden="true"></i>
+                            <span>Pie Chart</span>        
+                        </a>
+                    </li>
+                </ul>
+            </section>
+            <!-- /.sidebar -->
+        </aside>
+        <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
+            <!-- Main content -->
+            <section class="content">
+                <div class="row" id="sensor-data-chart-container">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="box-body">
+                                <div class="form-group">
+                                    <label for="chart-type" class="col-md-2 control-label">
+                                        Select data type
+                                    </label>
+                                    <div class="col-md-4">
+                                        <select class="form-control" name="chart-controller-input" id="chart-controller-input">
+                                            <option value="temperature">Temperature</option>
+                                            <option value="humidity">Humidity</option>
+                                            <option value="light" selected="selected">Light</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="row">
+                        <div class="realtime-chart col-md-10" style="padding-left:30px;" id="sensor-data-chart" data-unit="" data-init-data-url="/realtime-chart/api/get-init-data"
+                            data-lastest-data-url="/realtime-chart/api/get-lastest-data" data-init-data-option="" data-lastest-data-option="">
+                        </div>
+                        <div class="col-md-2 chart-legend"></div>
+                    </div>
+                </div>
+                <!-- <div class="row" id="temperature-chart-container"> -->
+                <!-- <div class="realtime-chart" id="humidity-chart" data-unit="%"> -->
+
+                <!-- </div> -->
+            </section>
+        </div>
+    </div>
+
+</body>
+
+<!-- Script Section -->
+
+<script type="text/javascript" src="/realtime-chart/static/js/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/realtime-chart/static/js/d3.js"></script>
+<script type="text/javascript" src="/realtime-chart/static/js/realtime-line-chart.js"></script>
+<script src="/realtime-chart/static/bower_components/bootstrap.min.js"></script>
+<script src="/realtime-chart/static/bower_components/jquery.slimscroll.js"></script>
+<script src="/realtime-chart/static/bower_components/adminlte.min.js"></script>
+<!-- //Script Section -->
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        let realtimeChartList = [];
+        let chartType = $("#chart-controller-input").val();
+        $("#sensor-data-chart").data("init-data-option", "dataType=" + chartType);
+        $("#sensor-data-chart").data("lastest-data-option", "dataType=" + chartType);
+        // console.log(chartType);
+        let sensorDataChart = new RealtimeLineChart("#sensor-data-chart");
+        sensorDataChart.initChart().then(function (data) {
+            $("#chart-controller-input").on('change', function () {
+                var self = this;
+                let chartType = this.value;
+                $(this).prop('disabled', true);
+                //clear old chart
+                // console.log(this.value);
+                // console.log(chartType);
+                sensorDataChart.destroy();
+                $("#sensor-data-chart").data("init-data-option", "dataType=" + chartType);
+                $("#sensor-data-chart").data("lastest-data-option", "dataType=" +
+                    chartType);
+                sensorDataChart = new RealtimeLineChart("#sensor-data-chart");
+                sensorDataChart.initChart();
+                setTimeout(function () {
+                    $(self).prop('disabled', false);
+
+                }, 2000);
+            });
+
+        });
+
+        // $(".realtime-chart").each(function (i, obj) {
+        //     let newChart = new RealtimeLineChart(obj, $(obj).data('unit'));
+        //     newChart.initChart();
+        //     // newChart.render();
+        //     realtimeChartList.push(newChart);
+        // });
+    });
+</script>
+
+</html>
