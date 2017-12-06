@@ -1,0 +1,6 @@
+docker run -d -it -p 1881:1880 \
+-v /home/cong/Documents/BKCloud-OLP2017/cong/create-node/node-red/data:/data \
+--name iot-node-red nodered/node-red-docker
+
+
+port: 1881

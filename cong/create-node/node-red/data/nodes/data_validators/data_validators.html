@@ -1,0 +1,239 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="data-validators">
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="ligh-validator"><i class="fa fa-sun-o" aria-hidden="true"></i> Light</label>
+        <div style="display:inline-block;width:70%">
+            <input type="number" min=0 style="width:30%" id="light-validator-min" placeholder="min">
+            <input type="number" min=0 style="width:30%" id="light-validator-max" placeholder="max">
+            <input type="text" style="width:35%" id="light-validator-unit" placeholder="unit">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <input type="checkbox" id="node-input-enableTempValidator" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-enableTempValidator" style="width:50%">
+                <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                 Enable Temperature Vaidator
+        </label>
+    </div>
+    <div class="form-row" id="temperature-validator-row">
+        <label for="temperature-validator " style="margin-left:20px;width: 100px;">
+            <i class="fa fa-sun-o " aria-hidden="true "></i> Temperature
+        </label>
+        <div style="display:inline-block; width:65%">
+            <input type="number" min=0 style="width:25%" id="temperature-validator-min">
+            <input type="number" min=0 style="width:25%" id="temperature-validator-max">
+            <input type="text" style="width:25%" id="temperature-validator-unit" placeholder="unit">
+        </div>
+    </div>
+
+    <div class="form-row">
+        <input type="checkbox" id="node-input-enableHumidityValidator" style="display: inline-block; width: auto; vertical-align: top;">
+        <label for="node-input-enableHumidityValidator" style="width:50%">
+                        <i class="fa fa-plus-circle" aria-hidden="true"></i>
+                         Enable Humidity Vaidator
+            </label>
+    </div>
+    <div class="form-row" id="humidity-validator-row">
+        <label for="humidity-validator " style="margin-left:20px;width: 100px;">
+                    <i class="fa fa-sun-o " aria-hidden="true "></i> Humidity
+                </label>
+        <div style="display:inline-block; width:65%">
+            <input type="number" min=0 style="width:25%" id="humidity-validator-min">
+            <input type="number" min=0 style="width:25%" id="humidity-validator-max">
+            <input type="text" style="width:25%" id="humidity-validator-unit" placeholder="unit">
+        </div>
+    </div>
+</script>
+
+<script type="text/x-red " data-help-name="data-validators">
+    <p>An processing data node use for valid input data</p>
+</script>
+
+<script type="text/javascript ">
+    RED.nodes.registerType('data-validators', {
+        category: 'function',
+        color: '#C0C0C0',
+        defaults: {
+            name: {
+                value: ""
+            },
+            lightValidator: {
+                value: {
+                    min: 0,
+                    max: 0,
+                    unit: 'lux'
+                },
+                validate: function (validator) {
+                    // console.log(validator);
+                    if (validator.min < 20 && validator.min <= validator.max &&
+                        validator.unit.length > 0) {
+                        return true;
+                    } else if (validator.min >= 20) {
+                        RED.notify("Min light value must be smaller than 20. ", "error ");
+                        return false;
+                    } else if (validator.min > validator.max) {
+                        RED.notify("Min light value must be smaller or equal max light ", "error ");
+                        return false;
+                    } else if (validator.unit.length == 0) {
+                        RED.notify("Light unit must not empty ", "error ");
+                        return false;
+                    }
+                }
+            },
+            enableTempValidator: {
+                value: true
+            },
+            tempValidator: {
+                value: {
+                    min: 0,
+                    max: 0,
+                    unit: 'C'
+                },
+                validate: function (validator) {
+                    if (this.enableTempValidator == false) {
+                        return true;
+                    } else {
+                        if (validator.min < 20 && validator.min <= validator.max &&
+                            validator.unit.length > 0) {
+                            return true;
+                        } else if (validator.min >= 20) {
+                            RED.notify("Min temperature value must be smaller than 20. ", "error ");
+                            return false;
+                        } else if (validator.min > validator.max) {
+                            RED.notify("Min temperature value must be smaller or equal max temperature ",
+                                "error ");
+                            return false;
+                        } else if (validator.unit.length == 0) {
+                            RED.notify("Temperature unit must not empty ", "error ");
+                            return false;
+                        }
+                    }
+                }
+            },
+
+            enableHumidityValidator: {
+                value: true
+            },
+            humidityValidator: {
+                value: {
+                    min: 0,
+                    max: 0,
+                    unit: '%'
+                },
+                validate: function (validator) {
+                    if (this.enableHumidityValidator == false) {
+                        return true;
+                    } else {
+                        if (validator.min < 20 && validator.min <= validator.max) {
+                            return true;
+                        } else if (validator.min >= 20) {
+                            RED.notify("Min humidity value must be smaller than 20. ", "error ");
+                            return false;
+                        } else if (validator.min > validator.max) {
+                            RED.notify("Min humidity value must be smaller or equal max humidity ",
+                                "error ");
+                            return false;
+                        }
+                    }
+                }
+            }
+
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "validation.png ",
+        align: "left ",
+        label: function () {
+            return this.name || "data validators ";
+        },
+        oneditprepare: function () {
+            var node = this;
+
+            $("#light-validator-min").val(node.lightValidator.min);
+            $("#light-validator-max").val(node.lightValidator.max);
+            $("#light-validator-unit").val(node.lightValidator.unit);
+            // console.log(node.enableTempValidator);
+            if (node.enableTempValidator == true) {
+                // console.log(node);
+                $("#temperature-validator-min").val(node.tempValidator.min);
+                $("#temperature-validator-max").val(node.tempValidator.max);
+                $("#temperature-validator-unit").val(node.tempValidator.unit);
+                $("#temperature-validator-row").show();
+            } else {
+                $("#temperature-validator-row").hide();
+            }
+
+            $("#node-input-enableTempValidator").change(function () {
+                let enableTempValidator = $("#node-input-enableTempValidator").is(":checked");
+                if (enableTempValidator) {
+                    $("#temperature-validator-row").show();
+                } else {
+                    $("#temperature-validator-min").val(0);
+                    $("#temperature-validator-max").val(0);
+                    $("#temperature-validator-unit").val("C");
+                    $("#temperature-validator-row").hide();
+                }
+            });
+
+            if (node.enableHumidityValidator == true) {
+                $("#humidity-validator-min").val(node.humidityValidator.min);
+                $("#humidity-validator-max").val(node.humidityValidator.max);
+                $("#humidity-validator-unit").val(node.humidityValidator.unit);
+                $("#humidity-validator-row").show();
+            } else {
+                $("#humidity-validator-row").hide();
+            }
+
+            $("#node-input-enableHumidityValidator").change(function () {
+                let isEnable = $("#node-input-enableHumidityValidator").is(":checked");
+                if (isEnable) {
+                    $("#humidity-validator-row").show();
+                } else {
+                    $("#humidity-validator-min").val(0);
+                    $("#humidity-validator-max").val(0);
+                    $("#humidity-validator-unit").val("%");
+                    $("#humidity-validator-row").hide();
+                }
+            });
+
+        },
+        oneditsave: function () {
+            this.lightValidator = {
+                min: parseInt($("#light-validator-min").val()),
+                max: parseInt($("#light-validator-max").val()),
+                unit: $("#light-validator-unit").val()
+            };
+            this.tempValidator = {
+                min: parseInt($("#temperature-validator-min").val()),
+                max: parseInt($("#temperature-validator-max").val()),
+                unit: $("#temperature-validator-unit").val()
+            }
+            this.humidityValidator = {
+                min: parseInt($("#humidity-validator-min").val()),
+                max: parseInt($("#humidity-validator-max").val()),
+                unit: $("#humidity-validator-unit").val()
+            }
+        }
+    });
+</script>

@@ -1,0 +1,135 @@
+<!--
+  Copyright JS Foundation and other contributors, http://js.foundation
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+
+
+<script type="text/x-red" data-template-name="example-config">
+    <div class="form-row">
+        <label for="node-config-input-hostIP"><i class="icon-bookmark"></i> Host IP</label>
+        <input type="text" id="node-config-input-hostIP">
+    </div>
+    <div class="form-row">
+        <label for="node-config-input-hostPort"><i class="icon-bookmark"></i> Host Port</label>
+        <input type="text" id="node-config-input-hostPort">
+    </div>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('example-config',{
+        category: 'config',
+        defaults: {
+            hostIP: {value:"",required:true},
+            hostPort: {value:"",required:true,validate:RED.validators.number()},
+        },
+        label: function() {
+            return this.hostIP+":"+this.hostPort;
+        }
+    });
+</script>
+
+
+
+<script type="text/x-red" data-template-name="input-example">
+    
+    <div class="form-row">
+        <label for="node-input-name"><i class="icon-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-hostAddress"><i class="fa fa-globe"></i> Server Addr</label>
+        <input type="text" id="node-input-hostAddress">
+    </div>
+    <div class="form-row">
+        <label for="node-input-triggerMode"> Trigger Mode</label>
+        <select id="node-input-triggerMode">
+            <option value="none">One time after start</option>
+            <option value="interval">Repeat after a time interval</option>
+        </select>
+    </div>
+    <div class="form-row trigger-mode-row" id="trigger-mode-row-none">
+        <label for="node-input-triggerDelay"><i class="fa fa-play"></i> <span>Delay</span></label>
+        <input id="node-input-triggerDelay" style="width:90px !important;" type="number" value="1" step="1" min="1"></input>
+        <span>seconds</span>
+    </div>
+    <div class="form-row trigger-mode-row" id="trigger-mode-interval-row">
+        <label for="node-input-triggerInterval"><i class="fa fa-play"></i> <span>Interval</span></label>
+        <input id="node-input-triggerInterval" style="width:90px !important;" type="number" value="1" step="1" min="1"></input>
+        <span>seconds</span>
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="input-example">
+    <p>A example about node input</p>
+</script>
+
+<script type="text/javascript">
+    RED.nodes.registerType('input-example', {
+        category: 'input',
+        color: '#f79267',
+        defaults: {
+            name: { value: "" },
+            triggerMode: { value: "none" },
+            triggerDelay: { value: 1 },
+            triggerInterval: { value: 1 },
+            enableButton: { value: true },
+            hostAddress: {value:"", type:"example-config"},
+        },
+        inputs: 0,
+        outputs: 1,
+        icon: "./icons/example.png",
+        label: function () {
+            return this.name || "input example";
+        },
+        oneditprepare: function () {
+            $("#node-input-triggerMode").on('change',function(){
+                console.log($("#node-input-triggerMode"));
+                console.log(this.value);
+
+            });
+        },
+        oneditsave: function () {
+
+        },
+        button: {
+            enabled: function () {
+                return this.enableButton;
+            },
+            onclick: function () {
+                if (!this.enableButton) {
+                    return RED.notify(RED._("notification.warning", { message: "manual trigger by button is only enable in one time mode" }), "warning");
+                }
+                console.log(this.id);
+                var node = this;
+                $.ajax({
+                    url: "input-example/" + node.id,
+                    type: "POST",
+                    success: function (resp) {
+                        // console.log(JSON.stringify(node));
+                        // console.log(node.name);
+                        RED.notify(node.name.toString() + " " + node.id.toString() + " trigger success.", "success");
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        RED.notify("Fail to create trigger from node " + node.name.toString() + " " + node.id.toString(), "error");
+                    }
+                });
+
+            }
+        }
+    });
+
+</script>
+
+
+

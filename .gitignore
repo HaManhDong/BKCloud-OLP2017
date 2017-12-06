@@ -8,7 +8,7 @@ mqtt-volume/
 node-red-nodes/
 node-red-volume/
 *node_modules/
-
+.vscode/
 # Compiled Object files
 *.slo
 *.lo
