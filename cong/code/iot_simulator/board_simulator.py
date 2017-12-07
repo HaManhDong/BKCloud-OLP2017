@@ -35,7 +35,7 @@ class BoardSimulator:
         self.sensors = sensors
         # register topic
         self.send_authenticate_topic = 'bkcloud/newDevice'
-        self.subcribe_topic = 'esp/' + "5C:3B:1A:16:2A" + '/action'
+        self.subcribe_topic = 'esp/' + "HN" + '/action'
         self.data_topic = 'esp/data'
         self.mqtt_client.username_pw_set(
             username=MQTT_CREDENTIALS['user_name'],
@@ -74,7 +74,8 @@ class BoardSimulator:
 
     def authenticate_with_server(self):
         auth_info = {
-            'macAddr': "5C:3B:1A:16:2A",
+            'location_id': "HN",
+            'location_name': "Ha Noi",
             'type': "ESP8266",
             'deviceID': "team01",
             'sensors': [

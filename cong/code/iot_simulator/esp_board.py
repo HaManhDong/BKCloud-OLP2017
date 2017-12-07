@@ -23,16 +23,16 @@ if __name__ == "__main__":
     if is_authenticated is True:
         print(is_authenticated)
         pass
-        for i in range(1,10):
-            publish_data={
-                'macAddr': "5C:3B:1A:16:2A",
+        for i in range(1, 30):
+            publish_data = {
+                'location_id': "HCM",
                 'type': "data",
                 'sensorsData': [
-                    {'name': "DHT11-t", 'value': 20+i, 'unit': "%"},
-                    {'name': "BH1750", 'value': 30+i, 'unit': "C"},
+                    {'name': "DHT11-t", 'value': 20 + i, 'unit': "%"},
+                    {'name': "BH1750", 'value': 30 + i, 'unit': "C"},
                 ]
             }
-            print('current temp'+str(30+i))
+            print('current temp' + str(30 + i))
             esp_simulator.publish_data("esp/data", publish_data)
             time.sleep(1)
         esp_simulator.mqtt_client.loop_stop()
