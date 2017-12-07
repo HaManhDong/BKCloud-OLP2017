@@ -23,26 +23,17 @@ if __name__ == "__main__":
     if is_authenticated is True:
         print(is_authenticated)
         pass
-        for i in range(1,50):
+        for i in range(1,10):
             publish_data={
                 'macAddr': "5C:3B:1A:16:2A",
                 'type': "data",
                 'sensorsData': [
-                    {'name': "DHT11-t", 'value': 20+i, 'unit': "C"},
-                    {'name': "BH1750", 'value': 360, 'unit': "Lux"},
+                    {'name': "DHT11-t", 'value': 20+i, 'unit': "%"},
+                    {'name': "BH1750", 'value': 30+i, 'unit': "C"},
                 ]
             }
-            esp_simulator.publish_data("bkcloud/data", publish_data)
-            time.sleep(1)
-            publish_data={
-                'macAddr': "5C:3B:1A:16:2A",
-                'name': "HC-SR501",
-                'type': "motion",
-            }
-            # for sensor_data in publish_data:
-            #     sensor_data['mac_addr'] = esp_simulator.mac_address
-            #     sensor_data['timestamp'] = int(time.mktime(datetime.now().timetuple())) * pow(10, 3)
-            esp_simulator.publish_data("bkcloud/data", publish_data)
+            print('current temp'+str(30+i))
+            esp_simulator.publish_data("esp/data", publish_data)
             time.sleep(1)
         esp_simulator.mqtt_client.loop_stop()
         esp_simulator.mqtt_client.disconnect()
