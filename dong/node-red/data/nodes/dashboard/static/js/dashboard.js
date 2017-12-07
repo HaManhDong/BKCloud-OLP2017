@@ -152,11 +152,11 @@ $('#dashboard').on('click', function () {
 
     currentDataUnitUpdate = setInterval(function () {
         getLatestUnitData(LATEST_UNIT_DATA, "C", "#current-temperature", '#current-temperature-datetime');
-        getLatestUnitData(LATEST_UNIT_DATA, "Lux", "#current-light", '#current-light-datetime');
+        getLatestUnitData(LATEST_UNIT_DATA, "%", "#current-humidity", '#current-humidity-datetime');
     }, currentDataUnitIntervalTime);
 
     var ctx = document.getElementById("average-temperature-bar-chart");
-    let days = ["Mon", "Tue", "Wed", "Thus", "Fri", "Sa"];
+    let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sa"];
     let today = new Date();
     let d = today.toString().split(" ")[0];
     const index = days.indexOf(d);
@@ -167,6 +167,7 @@ $('#dashboard').on('click', function () {
         let l2 = days.slice(index + 1, days.length);
         label = l2.concat(l1);
     }
+    console.log(label);
     let temperatureAverageBarChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -234,26 +235,26 @@ $('.small-box-sensor a').on('click', function () {
     $('#sensors-info').click();
 });
 
-$('#room1-led1-btn-on').on('click', function () {
-
-    $.post(THINGS_ACTION_URL,
-        {
-            topic: "bkcloud/MAC/action",
-            message:{
-                type: "ledAction",
-                action: "ON"
-            }
-        },
-        function (data, status) {
-            alert("Data: " + data + "\nStatus: " + status);
-        }
-    );
-    $('#room1-led1-state').html('ON');
-    $('#room1-led1-btn-on').addClass('disabled');
-    $('#room1-led1-btn-off').removeClass('disabled');
-});
-$('#room1-led1-btn-off').on('click', function () {
-    $('#room1-led1-state').html('OFF');
-    $('#room1-led1-btn-off').addClass('disabled');
-    $('#room1-led1-btn-on').removeClass('disabled');
-});
+// $('#room1-led1-btn-on').on('click', function () {
+//
+//     $.post(THINGS_ACTION_URL,
+//         {
+//             topic: "bkcloud/MAC/action",
+//             message:{
+//                 type: "ledAction",
+//                 action: "ON"
+//             }
+//         },
+//         function (data, status) {
+//             alert("Data: " + data + "\nStatus: " + status);
+//         }
+//     );
+//     $('#room1-led1-state').html('ON');
+//     $('#room1-led1-btn-on').addClass('disabled');
+//     $('#room1-led1-btn-off').removeClass('disabled');
+// });
+// $('#room1-led1-btn-off').on('click', function () {
+//     $('#room1-led1-state').html('OFF');
+//     $('#room1-led1-btn-off').addClass('disabled');
+//     $('#room1-led1-btn-on').removeClass('disabled');
+// });

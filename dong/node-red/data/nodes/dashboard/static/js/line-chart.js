@@ -8,20 +8,20 @@ $('#line-chart').on('click', function () {
 
     let ctx = document.getElementById("realtime-line-chart").getContext("2d");
 
-    let data = {
-        labels: ["January", "February", "March", "April", "May", "June", "July"],
+    let line_chart_data = {
+        labels: [],
         datasets: [{
-            label: "My First dataset",
+            label: "",
             fillColor: "rgba(220,220,220,0.2)",
             strokeColor: "rgba(220,220,220,1)",
             pointColor: "rgba(220,220,220,1)",
             pointStrokeColor: "#fff",
             pointHighlightFill: "#fff",
             pointHighlightStroke: "rgba(220,220,220,1)",
-            data: [65, 59, 80, 81, 56, 55, 40]
+            data: []
         }]
     };
-    let options = {
+    let line_chart_options = {
         maintainAspectRatio: false,
         animation: false,
         //Boolean - If we want to override with a hard coded scale
@@ -83,6 +83,15 @@ $('#line-chart').on('click', function () {
                                 data: sensors_chart
                             }).on("select2:select", function (e) {
                                 $(this).prop('disabled', true);
+                                if (realTimeCharts.length) {
+                                    for (let i = 0; i < realTimeCharts.length; i++) {
+                                        realTimeCharts[i].destroy();
+                                    }
+                                    $('#sensor-data-chart').empty();
+                                    $('#sensor-legend-chart').empty();
+                                }
+                                line_chart_data.datasets[0].data = [];
+                                line_chart_data.labels = [];
                                 let self = this;
                                 let key = e.target.value;
                                 let macAddr = key.split("/")[0];
@@ -90,7 +99,42 @@ $('#line-chart').on('click', function () {
                                 ajaxQuery(SENSOR_INIT_DATA + "?" + MAC_ADDR_PARAM + "=" + macAddr +
                                     "&" + SENSOR_NAME_PARAM + "=" + sensorName).then(
                                     function (data) {
-                                        console.log(data);
+                                        if (data.length) {
+                                            if (data[0].unit === "C") {
+                                                line_chart_data.datasets[0].label = "Temperature - C";
+                                            } else {
+                                                line_chart_data.datasets[0].label = "Humidity - %";
+                                            }
+                                            for (let i = 0; i < data.length; i++) {
+                                                let sensorData = data[i];
+                                                line_chart_data.datasets[0].data.push(sensorData.value);
+                                                let t = moment(new Date(sensorData.time)).format('HH:mm:ss');
+                                                line_chart_data.labels.push(t);
+                                            }
+                                            let newLineChart = new Chart(ctx, {
+                                                type: 'line',
+                                                data: line_chart_data,
+                                                options: line_chart_options
+                                            });
+                                            newLineChart.intervalTime = setInterval(function () {
+                                                ajaxQuery(SENSOR_LATEST_DATA + "?" + MAC_ADDR_PARAM + "=" + macAddr +
+                                                    "&" + SENSOR_NAME_PARAM + "=" + sensorName).then(
+                                                    function (data) {
+                                                        if (data.length) {
+                                                            setData(newLineChart, data[0].value);
+                                                            // setData(data.datasets[1].data);
+                                                            setLabels(newLineChart, data[0].time);
+                                                            newLineChart.update();
+                                                        }
+                                                    }
+                                                );
+                                            }, 2000);
+                                            newLineChart.destroy = function () {
+                                                clearInterval(newLineChart.intervalTime);
+                                            }
+                                            realTimeCharts.push(newLineChart);
+
+                                        }
                                     },
                                     function (error) {
                                         alert('Can not get sensor data!');
@@ -130,27 +174,14 @@ $('#line-chart').on('click', function () {
     }
 
 
-    var myLineChart = new Chart(ctx, {
-        type: 'line',
-        data: data,
-        options: options
-    });
-
-    // setInterval(function () {
-    //     setData(myLineChart);
-    //     // setData(data.datasets[1].data);
-    //     setLabels(myLineChart);
-    //     myLineChart.update();
-    // }, 2000);
-
-    function setLabels(myLineChart) {
-        let labels = myLineChart.data.labels;
-        myLineChart.data.labels.push(nextMonthName);
+    function setLabels(myLineChart, label) {
+        let l = moment(new Date(label)).format('HH:mm:ss');
+        myLineChart.data.labels.push(l);
         myLineChart.data.labels.shift();
     }
 
-    function setData(myLineChart) {
-        myLineChart.data.datasets[0].data.push(Math.floor(Math.random() * 100) + 1);
+    function setData(myLineChart, d) {
+        myLineChart.data.datasets[0].data.push(d);
         myLineChart.data.datasets[0].data.shift();
     }
 
