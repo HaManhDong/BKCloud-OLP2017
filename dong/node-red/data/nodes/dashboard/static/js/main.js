@@ -87,6 +87,7 @@ $('#devices-info').on('click', function () {
                 // console.log(date_created);
                 data_display.push([
                     data[i].macAddr,
+                    data[i].device_id,
                     data[i].type,
                     date_created,
                     data[i].status
@@ -100,6 +101,7 @@ $('#devices-info').on('click', function () {
             }
             let columns = [
                 {title: "MAC address"},
+                {title: "Device ID"},
                 {title: "Device type"},
                 {title: "Created at"},
                 {title: "Status"}
@@ -131,6 +133,7 @@ $('#sensors-info').on('click', function () {
     let getSensorInfo = ajaxQuery(SENSOR_INFO_API);
     getSensorInfo.then(
         function (data) {
+            // console.log(data);
             let data_display = [];
             for (let i = 0; i < data.length; i++) {
                 let date_created = data[i].created_at.split('.')[0];
@@ -138,6 +141,7 @@ $('#sensors-info').on('click', function () {
                 data_display.push([
                     data[i].macAddr,
                     data[i].name,
+                    data[i].unit,
                     date_created,
                     data[i].status
                 ])
@@ -145,6 +149,7 @@ $('#sensors-info').on('click', function () {
             let columns = [
                 {title: "Device's mac address"},
                 {title: "Sensor name"},
+                {title: "Unit"},
                 {title: "Created at"},
                 {title: "Status"}
             ];
