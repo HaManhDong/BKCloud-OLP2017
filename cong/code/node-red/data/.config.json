@@ -414,6 +414,16 @@
      "local": false,
      "module": "node-red",
      "file": "/data/nodes/meo-esp-out/meo-esp-out.js"
+    },
+    "threshold-operator": {
+     "name": "threshold-operator",
+     "types": [
+      "threshold-operator"
+     ],
+     "enabled": true,
+     "local": false,
+     "module": "node-red",
+     "file": "/data/nodes/threshold-operator-node/threshold-operator.js"
     }
    }
   },

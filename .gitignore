@@ -9,6 +9,8 @@ node-red-nodes/
 node-red-volume/
 *node_modules/
 .vscode/
+*.flows.json.backup
+*.pyc
 # Compiled Object files
 *.slo
 *.lo

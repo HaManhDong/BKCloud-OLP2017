@@ -35,8 +35,8 @@ class BoardSimulator:
         self.sensors = sensors
         # register topic
         self.send_authenticate_topic = 'bkcloud/newDevice'
-        self.subcribe_topic = 'bkcloud/' + "5C:3B:1A:16:2A" + '/action'
-        self.data_topic = 'bkcloud/data'
+        self.subcribe_topic = 'esp/' + "5C:3B:1A:16:2A" + '/action'
+        self.data_topic = 'esp/data'
         self.mqtt_client.username_pw_set(
             username=MQTT_CREDENTIALS['user_name'],
             password=MQTT_CREDENTIALS['password'])
@@ -76,15 +76,15 @@ class BoardSimulator:
         auth_info = {
             'macAddr': "5C:3B:1A:16:2A",
             'type': "ESP8266",
+            'deviceID': "team01",
             'sensors': [
                 {'name': "DHT11-t", 'unit': "C"},
-                {'name': "BH1750", 'unit': "Lux"},
-                {'name': "HC-SR501", 'unit': ""}
+                {'name': "BH1750", 'unit': "%"},
             ]
         }
         # retry authenticate 3 times
         for k in range(0, 3):
-            self.mqtt_client.publish('bkcloud/newDevice', json.dumps(auth_info))
+            self.mqtt_client.publish('esp/newDevice', json.dumps(auth_info))
             time.sleep(BoardSimulator.AUTHENTICATION_TIMEOUT)
             if self.is_authenticated is True:
                 break
